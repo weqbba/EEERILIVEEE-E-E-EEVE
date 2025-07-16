@@ -1,20 +1,58 @@
+--loadstring(game:HttpGet("https://gist.githubusercontent.com/lolidkwhy678/8789dcee674b733f339fc9376e512287/raw/0faff48438c6091deb3b3672a430cdfb07417111/tsb%2520inventory"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/namertag"))()
 wait(5)
-
 local player = game.Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 local playerGui = player:WaitForChild("PlayerGui")
+local workspace = game:GetService("Workspace")
+local timeposcur = 0
+local TextChatService = game:GetService("TextChatService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
-local function sendChatCommand()
-    pcall(function()
-        ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest")
-            :FireServer("-gh 108158299087829", "All")
-    end)
+local function forceChat(player, message)
+	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+		local channel = TextChatService:FindFirstChild("TextChannel_1") or TextChatService:FindFirstChild("RBXGeneral")
+		if channel then
+			channel:SendAsync(message, player)
+		end
+	else
+		local event = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+		if event and event:FindFirstChild("SayMessageRequest") then
+			event.SayMessageRequest:FireClient(player, message, "All")
+		end
+	end
 end
 
+-- Example usage:
+Players.PlayerAdded:Connect(function(player)
+	task.wait(3) -- optional delay
+	forceChat(player, "-gh 108158299087829")
+end)
+
+local player = game.Players.LocalPlayer
+
 local SG = Instance.new("ScreenGui")
-SG.Parent = playerGui
+SG.Parent = player:WaitForChild("PlayerGui")
+
+local CaptionStroke = Instance.new("UIStroke")
+local Caption = Instance.new("TextLabel")
+local Text2 = Instance.new("UIStroke")
+local Text3 = Instance.new("UIStroke")
+local Yu = Instance.new("UIStroke")
+local C = Instance.new("UIGradient")
+local CaptionGradient = Instance.new("UIGradient")
+local G = Instance.new("UIGradient")
+local Rq = Instance.new("UIGradient")
+
+local Gcolor = Color3.fromRGB(100, 100, 100)
+local A = Color3.fromRGB(255,255,255)
+local W = Color3.fromRGB(255, 255, 255)
+local H = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, A),
+    ColorSequenceKeypoint.new(0.500, Gcolor),
+    ColorSequenceKeypoint.new(1, W)
+}
 
 local billboard2 = Instance.new("BillboardGui")
 billboard2.Name = "Test"
@@ -25,428 +63,560 @@ billboard2.AlwaysOnTop = true
 billboard2.MaxDistance = 25
 billboard2.Parent = player.Character.Head
 
-local purpleColor = Color3.fromRGB(128, 0, 128)
-
 local Q = Instance.new("TextLabel")
 Q.Text = "Fake Noli Script by fiduciaryicicles_"
 Q.Font = Enum.Font.Sarpanch
 Q.TextSize = 30
-Q.TextColor3 = purpleColor
+Q.TextColor3 = Color3.fromRGB(0, 0, 0)
 Q.BackgroundTransparency = 1
 Q.Parent = billboard2
-Q.Position = UDim2.new(0.5, -50, 1, -15)
+Q.Position = UDim2.new(0.5, -50, 1, -15) 
 Q.Size = UDim2.new(1, 0, 1, 0)
 Q.Rotation = 0
 
-local Text2 = Instance.new("UIStroke", Q)
 Text2.Thickness = 1
-Text2.Color = purpleColor
+Text2.Color = Color3.fromRGB(255,255,255)
+Text2.Parent = Q
 Text2.LineJoinMode = Enum.LineJoinMode.Miter
 
-local H = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, purpleColor),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 100, 100)),
-    ColorSequenceKeypoint.new(1, purpleColor)
-}
-
-local Rq = Instance.new("UIGradient", Text2)
+Rq.Parent = Text2
 Rq.Color = H
-Rq.Enabled = true
-Rq.Rotation = 85
-Rq.Offset = Vector2.new(-1, 0)
 Rq.Name = "Test3"
+Rq.Enabled = true 
+Rq.Rotation = 85
+Rq.Offset = Vector2.new(-1,0)
 
-local textLabel1 = Instance.new("TextLabel", billboard2)
-textLabel1.Text = "─「 ".. tostring(player.Name) .." 」─"
+local textLabel1 = Instance.new("TextLabel")
+textLabel1.Text = "─「 " .. player.Name .. " 」─"  -- Replace YOURSELF NOLI with username dynamically
 textLabel1.Font = Enum.Font.Sarpanch
 textLabel1.TextSize = 50
-textLabel1.TextColor3 = purpleColor
+textLabel1.TextColor3 = Color3.fromRGB(128, 0, 128)  -- Purple text
 textLabel1.BackgroundTransparency = 1
+textLabel1.Parent = billboard2
 textLabel1.Size = UDim2.new(1, 0, 1, 0)
 textLabel1.Rotation = 0
 
-local Text3 = Instance.new("UIStroke", textLabel1)
 Text3.Thickness = 1
-Text3.Color = purpleColor
+Text3.Color = Color3.fromRGB(255,255,255)
+Text3.Parent = textLabel1
 Text3.LineJoinMode = Enum.LineJoinMode.Miter
 
-local C = Instance.new("UIGradient", Text3)
+C.Parent = Text3
 C.Color = H
-C.Enabled = true
-C.Rotation = 85
-C.Offset = Vector2.new(0, 0)
 C.Name = "Test2"
+C.Enabled = true 
+C.Rotation = 85
+C.Offset = Vector2.new(0,0)
 
-local Playsound = Instance.new("Sound")
+local Playsound = Instance.new("Sound",game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart"))
 Playsound.Name = "Danc"
 Playsound.Volume = 1
 Playsound.Looped = true
-Playsound.Parent = player.Character:WaitForChild("HumanoidRootPart")
-
+Playsound.Parent = game:GetService("RunService")
 local exploit = "shitsploit"
-pcall(function()
-    exploit = getexecutorname()
-end)
-
-local function customasset(id)
-    if exploit ~= "CaetSploit" then
-        local idwithoutthatbit = string.gsub(id, "Dances/", "")
-        if not isfile(id) then
-            writefile(id, game:HttpGet("https://github.com/Solary-3/Scripts/tree/Audios-1" .. idwithoutthatbit))
+        pcall(function()
+            exploit = getexecutorname()
+        end)
+	local customasset = function(id)
+        if exploit ~= "CaetSploit" then
+        idwithoutthatbit= string.gsub(id,"Dances/","")
+        if not isfile(id) then 
+         writefile(id,game:HttpGet("https://github.com/Solary-3/Scripts/tree/Audios-1"..idwithoutthatbit))
         end
-        repeat task.wait() until isfile(id)
+       repeat task.wait() until isfile(id)
     end
-    local s = Instance.new("Sound")
-    s.Parent = player.Character:WaitForChild("HumanoidRootPart")
-    s.SoundId = getcustomasset(id)
-    task.spawn(function()
-        task.wait(1)
-        s:Destroy()
-    end)
-    return s.SoundId
-end
-
-local function stopSound()
-    Playsound:Stop()
-end
-
-if not getgenv()["Animator"] then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
-end
-
-local Animations = {}
-local AnimatorInstance = nil
-
-local function playBaseAnimation(animId)
-    local character = player.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
-            AnimatorInstance = animator
-            local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://" .. tostring(animId)
-            local track = animator:LoadAnimation(anim)
-            track.Looped = true
-            track:Play()
-            return track
-        end
+        local s = Instance.new("Sound")
+        s.Parent =game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+        s.SoundId = getcustomasset(id)
+        task.spawn(function()
+            task.wait(1)
+            s:Destroy()
+        end)
+        return s.SoundId
     end
-    return nil
-end
+local function M()
+     Playsound:Stop()
+     --Playsound:Destroy()
+     end
 
-Animations.Idle = playBaseAnimation(75752967925574)
-Animations.Run = playBaseAnimation(88877750373872)
-Animations.Walk = playBaseAnimation(88877750373872)
 
--- Tool: Noli Observant
-writefile("Dances/rat.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/rat.mp3?raw=true"))
+
+
+
+
+
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Noli Observant"
 tool.RequiresHandle = false
+writefile("Dances/rat.mp3", 
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/rat.mp3?raw=true"))
+	if not getgenv()["Animator"] then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 96889126452697)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/rat.mp3")
-        Playsound:Play()
-    end
-end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+	local character = player.Character
+	if character then
+		Anim = Animator.new(character, 96889126452697)
+		Anim:Play()
+		Anim.Stopped:Connect(function()
+			Anim:Play()
+		end)
+		Playsound.SoundId = customasset("Dances/rat.mp3")
+		timeposcur = Playsound.TimePosition
+		Playsound:Play()
+	end
 end)
 
--- Tool: Noli Intro
-writefile("Dances/xxanteria.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/xxanteria%2C%20isq%20-%20FUNKED%20UP%20(SLOWED)%20(320kbps).mp3?raw=true"))
+tool.Unequipped:Connect(function()
+	if Anim then
+		Anim:Stop()
+		Anim:Destroy()
+		
+		
+	end
+	M()
+end)
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Noli Intro"
 tool.RequiresHandle = false
+writefile("Dances/xxanteria, isq - FUNKED UP (SLOWED) (320kbps).mp3", 
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/xxanteria%2C%20isq%20-%20FUNKED%20UP%20(SLOWED)%20(320kbps).mp3?raw=true"))
+	if not getgenv()["Animator"] then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 111234017593496)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/xxanteria.mp3")
-        Playsound:Play()
-    end
-end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+	local character = player.Character
+	if character then
+	     
+	     
+		Anim = Animator.new(character, 111234017593496)
+		Anim:Play()
+		Anim.Stopped:Connect(function()
+			Anim:Play()
+		end)
+		
+		Playsound.SoundId = customasset("Dances/xxanteria, isq - FUNKED UP (SLOWED) (320kbps).mp3")
+		timeposcur = Playsound.TimePosition
+		Playsound:Play()
+	end
 end)
 
--- Tool: Noli Stun Start
-writefile("Dances/Assumptions.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Assumptions.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+
+end
+M()
+end)
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Noli Stun Start"
 tool.RequiresHandle = false
+
+writefile("Dances/Assumptions.mp3",
+game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Assumptions.mp3?raw=true"))
+
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 88480766118131)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/Assumptions.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+     
+     
+Anim = Animator.new(character, 88480766118131)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/Assumptions.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: Noli Stun Loop
-writefile("Dances/Assumptions.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Assumptions.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+end
+M()
+end)
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Noli Stun Loop"
 tool.RequiresHandle = false
+
+writefile("Dances/Assumptions.mp3",
+game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Assumptions.mp3?raw=true"))
+
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 117229980548299)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/Assumptions.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+     
+     
+Anim = Animator.new(character, 117229980548299)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/Assumptions.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: Noli Stun End
-writefile("Dances/Bjean.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Bjean.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+
+end
+M()
+end)
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Noli Stun End"
 tool.RequiresHandle = false
+
+writefile("Dances/Bjean.mp3", 
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Bjean.mp3?raw=true"))
+	
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 90991516245700)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/Bjean.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+     
+     
+Anim = Animator.new(character, 90991516245700)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/Bjean.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: Noli Stab
-writefile("Dances/Egypt.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Egypt.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+end
+M()
+end)
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Noli Stab"
 tool.RequiresHandle = false
+
+writefile("Dances/Egypt.mp3", 
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Egypt.mp3?raw=true"))
+
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 135649521846559)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/Egypt.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+      
+     
+Anim = Animator.new(character, 135649521846559)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/Egypt.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: CaramellDansen
-writefile("Dances/caramell.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/caramell.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+ 
+end
+M()
+end)
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "CaramellDansen"
 tool.RequiresHandle = false
+
+writefile("Dances/caramell.mp3",
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/caramell.mp3?raw=true"))
+
+
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 103597509139287)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/caramell.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+     
+     
+Anim = Animator.new(character, 103597509139287)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/caramell.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: Stock Shuffle
-writefile("Dances/Stock.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Stock.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+end
+M()
+end)
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Stock Shuffle"
 tool.RequiresHandle = false
+
+writefile("Dances/Stock.mp3", 
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Stock.mp3?raw=true"))
+
+
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 15039780593)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/Stock.mp3")
-        Playsound:Play()
-    end
-end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+local character = player.Character
+if character then
+     
+     
+Anim = Animator.new(character, 15039780593)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
 
--- Tool: Two
-writefile("Dances/LeftRight.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/LeftRight.mp3?raw=true"))
+Playsound.SoundId = customasset("Dances/Stock.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
+end)
+
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+
+end
+M()
+end)
+
+
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Two"
 tool.RequiresHandle = false
+
+writefile("Dances/LeftRight.mp3", 
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/LeftRight.mp3?raw=true"))
+
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 137845929482571)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/LeftRight.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+     
+     
+Anim = Animator.new(character, 137845929482571)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/LeftRight.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: Mesmerizer
-writefile("Dances/Mesmerizer.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Mesmerizer.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+
+end
+M()
+end)
+
+
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Mesmerizer"
 tool.RequiresHandle = false
+
+writefile("Dances/Mesmerizer.mp3", 
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Mesmerizer.mp3?raw=true"))
+
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githfubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 107578737342278)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/Mesmerizer.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+     
+     
+Anim = Animator.new(character, 107578737342278)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/Mesmerizer.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: Lemon Melon Cookie
-writefile("Dances/Lemon.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Lemon.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+
+end
+M()
+end)
+
+
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Lemon Melon Cookie"
 tool.RequiresHandle = false
+
+writefile("Dances/Lemon.mp3",
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Lemon.mp3?raw=true"))
+
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 120262284704633)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/Lemon.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+     
+     
+Anim = Animator.new(character, 120262284704633)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/Lemon.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: Hakari
-writefile("Dances/TUCA DONKA.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/TUCA%20DONKA.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+
+end
+M()
+end)
+
+
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Hakari"
 tool.RequiresHandle = false
+writefile("Dances/TUCA DONKA.mp3",
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/TUCA%20DONKA.mp3?raw=true"))
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 114322394064953)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/TUCA DONKA.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+Anim = Animator.new(character, 114322394064953)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
-tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+Playsound.SoundId = customasset("Dances/TUCA DONKA.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
 end)
 
--- Tool: Static
-writefile("Dances/Static.mp3", game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Static.mp3?raw=true"))
+tool.Unequipped:Connect(function()
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+
+end
+M()
+end)
 local tool = Instance.new("Tool", backpack)
 tool.Name = "Static"
 tool.RequiresHandle = false
+writefile("Dances/Static.mp3", 
+	game:HttpGet("https://github.com/Solary-3/Scripts/blob/Audios-1/Static.mp3?raw=true"))
+if not getgenv()["Animator"] then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xhayper/Animator/main/Source/Main.lua"))()
+end
 local Anim = nil
+
 tool.Equipped:Connect(function()
-    sendChatCommand()
-    for _, track in pairs(Animations) do if track then track:Stop() end end
-    local character = player.Character
-    if character then
-        Anim = Animator.new(character, 139065991651723)
-        Anim:Play()
-        Anim.Stopped:Connect(function() Anim:Play() end)
-        Playsound.SoundId = customasset("Dances/Static.mp3")
-        Playsound:Play()
-    end
+local character = player.Character
+if character then
+Anim = Animator.new(character, 139065991651723)
+Anim:Play()
+Anim.Stopped:Connect(function()
+Anim:Play()
 end)
+Playsound.SoundId = customasset("Dances/Static.mp3")
+timeposcur = Playsound.TimePosition
+Playsound:Play()
+end
+end)
+
 tool.Unequipped:Connect(function()
-    if Anim then Anim:Stop() Anim:Destroy() Anim = nil end
-    stopSound()
-    for _, track in pairs(Animations) do if track then track:Play() end end
+if Anim then
+Anim:Stop()
+Anim:Destroy()
+
+end
+M()
 end)
