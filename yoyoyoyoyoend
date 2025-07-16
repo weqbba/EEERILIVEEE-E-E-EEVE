@@ -1,14 +1,16 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
-local Figure = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-local Torso = Figure:WaitForChild("Torso")
-local RightShoulder = Torso:WaitForChild("Right Shoulder")
-local LeftShoulder = Torso:WaitForChild("Left Shoulder")
-local RightHip = Torso:WaitForChild("Right Hip")
-local LeftHip = Torso:WaitForChild("Left Hip")
-local Neck = Torso:WaitForChild("Neck")
-local Humanoid = Figure:WaitForChild("Humanoid")
+local Player = Players.LocalPlayer
+local Figure = nil
+local Torso = nil
+local RightShoulder = nil
+local LeftShoulder = nil
+local RightHip = nil
+local LeftHip = nil
+local Neck = nil
+local Humanoid = nil
+local Animator = nil -- New: Reference to the Animator
 local pose = "Standing"
 
 local currentAnim = ""
@@ -28,7 +30,7 @@ local animNames = {
 		{ id = "rbxassetid://180426354", weight = 10 }
 	},
 	run = {
-		{ id = "rbxassetid://180426334", weight = 10 }  -- <-- replace with a valid run animation ID
+		{ id = "rbxassetid://180426334", weight = 10 } -- <-- IMPORTANT: replace with a valid run animation ID if this one doesn't work
 	},
 	jump = {
 		{ id = "rbxassetid://125750702", weight = 10 }
@@ -187,40 +189,45 @@ function keyFrameReachedFunc(frameName)
 			repeatAnim = "idle"
 		end
 		local animSpeed = currentAnimSpeed
-		playAnimation(repeatAnim, 0.0, Humanoid)
+		-- Ensure Animator exists before playing
+		if Animator then
+			playAnimation(repeatAnim, 0.0, Humanoid)
+		end
 		setAnimationSpeed(animSpeed)
 	end
 end
 
 function playAnimation(animName, transitionTime, humanoid)
-	pcall(function()
-		if not animTable[animName] then return end
-		local roll = math.random(1, animTable[animName].totalWeight)
-		local idx = 1
-		while roll > animTable[animName][idx].weight do
-			roll = roll - animTable[animName][idx].weight
-			idx = idx + 1
-		end
-		local anim = animTable[animName][idx].anim
+	-- Removed pcall to expose errors for easier debugging
+	if not animTable[animName] then return end
+	if not Animator then warn("Animator not found for humanoid:", humanoid.Name); return end -- Warn if Animator is missing
 
-		if anim ~= currentAnimInstance then
-			if currentAnimTrack then
-				currentAnimTrack:Stop(transitionTime)
-				currentAnimTrack:Destroy()
-			end
-			currentAnimSpeed = 1.0
-			currentAnimTrack = humanoid:LoadAnimation(anim)
-			currentAnimTrack.Priority = Enum.AnimationPriority.Core
-			currentAnimTrack:Play(transitionTime)
-			currentAnim = animName
-			currentAnimInstance = anim
+	local roll = math.random(1, animTable[animName].totalWeight)
+	local idx = 1
+	while roll > animTable[animName][idx].weight do
+		roll = roll - animTable[animName][idx].weight
+		idx = idx + 1
+	end
+	local anim = animTable[animName][idx].anim
 
-			if currentAnimKeyframeHandler then
-				currentAnimKeyframeHandler:Disconnect()
-			end
-			currentAnimKeyframeHandler = currentAnimTrack.KeyframeReached:Connect(keyFrameReachedFunc)
+	if anim ~= currentAnimInstance then
+		if currentAnimTrack then
+			currentAnimTrack:Stop(transitionTime)
+			currentAnimTrack:Destroy()
 		end
-	end)
+		currentAnimSpeed = 1.0
+		-- Use Animator:LoadAnimation instead of Humanoid:LoadAnimation
+		currentAnimTrack = Animator:LoadAnimation(anim)
+		currentAnimTrack.Priority = Enum.AnimationPriority.Core
+		currentAnimTrack:Play(transitionTime)
+		currentAnim = animName
+		currentAnimInstance = anim
+
+		if currentAnimKeyframeHandler then
+			currentAnimKeyframeHandler:Disconnect()
+		end
+		currentAnimKeyframeHandler = currentAnimTrack.KeyframeReached:Connect(keyFrameReachedFunc)
+	end
 end
 
 local toolAnimName = ""
@@ -230,12 +237,16 @@ local currentToolAnimKeyframeHandler = nil
 
 function toolKeyFrameReachedFunc(frameName)
 	if frameName == "End" then
-		playToolAnimation(toolAnimName, 0.0, Humanoid)
+		if Animator then -- Ensure Animator exists
+			playToolAnimation(toolAnimName, 0.0, Humanoid)
+		end
 	end
 end
 
 function playToolAnimation(animName, transitionTime, humanoid, priority)
 	if not animTable[animName] then return end
+	if not Animator then warn("Animator not found for humanoid:", humanoid.Name); return end -- Warn if Animator is missing
+
 	local roll = math.random(1, animTable[animName].totalWeight)
 	local idx = 1
 	while roll > animTable[animName][idx].weight do
@@ -250,7 +261,8 @@ function playToolAnimation(animName, transitionTime, humanoid, priority)
 			toolAnimTrack:Destroy()
 			transitionTime = 0
 		end
-		toolAnimTrack = humanoid:LoadAnimation(anim)
+		-- Use Animator:LoadAnimation
+		toolAnimTrack = Animator:LoadAnimation(anim)
 		if priority then
 			toolAnimTrack.Priority = priority
 		end
@@ -285,25 +297,40 @@ function stopToolAnimations()
 	return oldAnim
 end
 
+-- Animation Event Handlers --
+local connections = {} -- Store connections to disconnect on character death
+
 function onRunning(speed)
-	pcall(function()
-		if speed > 0.01 then
-			playAnimation("walk", 0.1, Humanoid)
-			if currentAnimInstance and currentAnimInstance.AnimationId == "rbxassetid://180426354" then
-				setAnimationSpeed(speed / 14.5)
-			end
-			pose = "Running"
-		else
-			if emoteNames[currentAnim] == nil then
-				playAnimation("idle", 0.1, Humanoid)
-				pose = "Standing"
-			end
+	-- Removed pcall to expose errors for easier debugging
+	if Humanoid.Sit then return end -- Don't animate if sitting
+
+	local runThreshold = Humanoid.WalkSpeed + 2 -- Example: Play run if speed is above WalkSpeed + 2
+	-- Adjust this threshold as needed based on your game's Humanoid.WalkSpeed
+
+	if speed > runThreshold then
+		playAnimation("run", 0.1, Humanoid)
+		setAnimationSpeed(speed / Humanoid.WalkSpeed) -- Adjust speed based on actual Humanoid WalkSpeed
+		pose = "Running"
+	elseif speed > 0.01 then
+		playAnimation("walk", 0.1, Humanoid)
+		-- The original script had a specific ID check for walk speed adjustment.
+		-- It's usually better to adjust based on Humanoid.WalkSpeed directly.
+		if currentAnimInstance and currentAnimInstance.AnimationId == "rbxassetid://180426354" then
+			setAnimationSpeed(speed / 14.5) -- Keeping original logic for walk speed adjustment for now.
 		end
-	end)
+		pose = "Running"
+	else
+		if emoteNames[currentAnim] == nil then
+			playAnimation("idle", 0.1, Humanoid)
+			pose = "Standing"
+		end
+	end
 end
 
 function onDied()
 	pose = "Dead"
+	stopAllAnimations() -- Stop all animations when dead
+	stopToolAnimations()
 end
 
 function onJumping()
@@ -320,6 +347,7 @@ end
 
 function onGettingUp()
 	pose = "GettingUp"
+	-- Optionally play a 'getting up' animation if you have one
 end
 
 function onFreeFall()
@@ -331,24 +359,34 @@ end
 
 function onFallingDown()
 	pose = "FallingDown"
+	-- Optionally play a 'falling down' animation if you have one
 end
 
 function onSeated()
 	pose = "Seated"
+	playAnimation("sit", 0.5, Humanoid) -- Play sit animation directly here
 end
 
 function onPlatformStanding()
 	pose = "PlatformStanding"
-end
-
-function onSwimming(speed)
-	if speed > 0 then
-		pose = "Running"
-	else
-		pose = "Standing"
+	-- Optionally play a 'platform standing' animation or idle if you have one
+	if emoteNames[currentAnim] == nil then
+		playAnimation("idle", 0.1, Humanoid)
 	end
 end
 
+function onSwimming(speed)
+	-- You might want specific swimming animations
+	if speed > 0 then
+		pose = "Running" -- Or "Swimming" if you add a swim anim
+		-- playAnimation("swim_forward", 0.1, Humanoid)
+	else
+		pose = "Standing" -- Or "Swim_idle"
+		-- playAnimation("swim_idle", 0.1, Humanoid)
+	end
+end
+
+-- Tool handling functions (unchanged)
 function getTool()
 	for _, kid in ipairs(Figure:GetChildren()) do
 		if kid.ClassName == "Tool" then return kid end
@@ -397,6 +435,11 @@ function move(time)
 	local deltaTime = time - lastTick
 	lastTick = time
 
+	-- Ensure Humanoid exists and is not nil before proceeding
+	if not Humanoid or Humanoid.Health <= 0 then
+		return
+	end
+
 	local climbFudge = 0
 	local setAngles = false
 
@@ -404,15 +447,18 @@ function move(time)
 		jumpAnimTime = jumpAnimTime - deltaTime
 	end
 
+	-- Re-evaluated main animation logic to prevent conflicts
 	if pose == "FreeFall" and jumpAnimTime <= 0 then
 		playAnimation("fall", fallTransitionTime, Humanoid)
-	elseif pose == "Seated" then
-		playAnimation("sit", 0.5, Humanoid)
-		return
-	elseif pose == "Running" then
-		playAnimation("walk", 0.1, Humanoid)
+	-- 'Seated' is now handled in onSeated, so not needed here
+	-- 'Running' is now handled in onRunning, but this section maintains some old logic for pose updates
 	elseif pose == "Dead" or pose == "GettingUp" or pose == "FallingDown" or pose == "Seated" or pose == "PlatformStanding" then
-		stopAllAnimations()
+		-- In these states, the main animation loop should probably not be trying to force specific animations,
+		-- as the humanoid state handlers (like onSeated) should manage them.
+		-- We'll keep stopAllAnimations for Dead/GettingUp/FallingDown to ensure no leftover animations.
+		if pose == "Dead" or pose == "GettingUp" or pose == "FallingDown" then
+			stopAllAnimations()
+		end
 		amplitude = 0.1
 		frequency = 1
 		setAngles = true
@@ -431,7 +477,7 @@ function move(time)
 		local animStringValueObject = getToolAnim(tool)
 		if animStringValueObject then
 			toolAnim = animStringValueObject.Value
-			animStringValueObject.Parent = nil
+			animStringValueObject.Parent = nil -- This will delete the StringValue after reading! Be careful if it's meant to persist.
 			toolAnimTime = time + 0.3
 		end
 		if time > toolAnimTime then
@@ -447,27 +493,54 @@ function move(time)
 	end
 end
 
-Humanoid.Died:Connect(onDied)
-Humanoid.Running:Connect(onRunning)
-Humanoid.Jumping:Connect(onJumping)
-Humanoid.Climbing:Connect(onClimbing)
-Humanoid.GettingUp:Connect(onGettingUp)
-Humanoid.FreeFalling:Connect(onFreeFall)
-Humanoid.FallingDown:Connect(onFallingDown)
-Humanoid.Seated:Connect(onSeated)
-Humanoid.PlatformStanding:Connect(onPlatformStanding)
-Humanoid.Swimming:Connect(onSwimming)
+-- Function to set up character and connect events on spawn
+local function setupCharacter(character)
+	-- Disconnect previous connections if they exist (for respawns)
+	for _, conn in pairs(connections) do
+		conn:Disconnect()
+	end
+	connections = {} -- Clear the table
 
-local dead = false
+	Figure = character
+	-- Wait for all parts to load for the new character
+	Torso = Figure:WaitForChild("Torso")
+	RightShoulder = Torso:WaitForChild("Right Shoulder")
+	LeftShoulder = Torso:WaitForChild("Left Shoulder")
+	RightHip = Torso:WaitForChild("Right Hip")
+	LeftHip = Torso:WaitForChild("Left Hip")
+	Neck = Torso:WaitForChild("Neck")
+	Humanoid = Figure:WaitForChild("Humanoid")
+	Animator = Humanoid:WaitForChild("Animator") -- Wait for the Animator
 
-Players.LocalPlayer.CharacterAdded:Connect(function()
-	dead = true
-end)
+	-- Connect Humanoid events for the new character
+	table.insert(connections, Humanoid.Died:Connect(onDied))
+	table.insert(connections, Humanoid.Running:Connect(onRunning))
+	table.insert(connections, Humanoid.Jumping:Connect(onJumping))
+	table.insert(connections, Humanoid.Climbing:Connect(onClimbing))
+	table.insert(connections, Humanoid.GettingUp:Connect(onGettingUp))
+	table.insert(connections, Humanoid.FreeFalling:Connect(onFreeFall))
+	table.insert(connections, Humanoid.FallingDown:Connect(onFallingDown))
+	table.insert(connections, Humanoid.Seated:Connect(onSeated))
+	table.insert(connections, Humanoid.PlatformStanding:Connect(onPlatformStanding))
+	table.insert(connections, Humanoid.Swimming:Connect(onSwimming))
 
-playAnimation("idle", 0.1, Humanoid)
-pose = "Standing"
+	-- Start initial animation
+	playAnimation("idle", 0.1, Humanoid)
+	pose = "Standing"
+end
 
+-- Initial setup if character already exists when script runs
+if Player.Character then
+	setupCharacter(Player.Character)
+end
+
+-- Connect to CharacterAdded for future respawns
+Player.CharacterAdded:Connect(setupCharacter)
+
+-- Heartbeat loop runs continuously to update animations
 RunService.Heartbeat:Connect(function(time)
-	if dead then return end
-	move(time)
+	-- Only run move if a character and humanoid are available
+	if Figure and Humanoid and Humanoid.Health > 0 then
+		move(time)
+	end
 end)
