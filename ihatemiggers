@@ -10,26 +10,6 @@ local TextChatService = game:GetService("TextChatService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local function forceChat(player, message)
-	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-		local channel = TextChatService:FindFirstChild("TextChannel_1") or TextChatService:FindFirstChild("RBXGeneral")
-		if channel then
-			channel:SendAsync(message, player)
-		end
-	else
-		local event = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
-		if event and event:FindFirstChild("SayMessageRequest") then
-			event.SayMessageRequest:FireClient(player, message, "All")
-		end
-	end
-end
-
--- Example usage:
-Players.PlayerAdded:Connect(function(player)
-	task.wait(3) -- optional delay
-	forceChat(player, "-gh 108158299087829")
-end)
-
 local player = game.Players.LocalPlayer
 
 local SG = Instance.new("ScreenGui")
@@ -620,3 +600,100 @@ Anim:Destroy()
 end
 M()
 end)
+local players = game:GetService("Players")
+local runService = game:GetService("RunService")
+
+local player = players.LocalPlayer
+local function onCharacterAdded(character)
+	local humanoid = character:WaitForChild("Humanoid")
+	local animator = humanoid:WaitForChild("Animator")
+	local tool = nil
+
+	local anims = {
+		Idle = "rbxassetid://75752967925574",
+		Walk = "rbxassetid://138716243839932",
+		Run = "rbxassetid://88877750373872"
+	}
+
+	local loadedAnims = {
+		Idle = nil,
+		Walk = nil,
+		Run = nil
+	}
+
+	for name, id in pairs(anims) do
+		local anim = Instance.new("Animation")
+		anim.AnimationId = id
+		loadedAnims[name] = animator:LoadAnimation(anim)
+		loadedAnims[name].Priority = Enum.AnimationPriority.Movement
+	end
+
+	local function isToolPlaying()
+		if not tool then return false end
+		for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+			if track:IsDescendantOf(tool) then
+				return true
+			end
+		end
+		return false
+	end
+
+	local function onToolAdded(t)
+		tool = t
+	end
+
+	local function onToolRemoved()
+		tool = nil
+	end
+
+	character.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			onToolAdded(child)
+		end
+	end)
+
+	character.ChildRemoved:Connect(function(child)
+		if child == tool then
+			onToolRemoved()
+		end
+	end)
+
+	runService.RenderStepped:Connect(function()
+		if not isToolPlaying() then
+			local state = humanoid:GetState()
+			if state == Enum.HumanoidStateType.Running then
+				if humanoid.MoveDirection.Magnitude > 0 then
+					if not loadedAnims.Run.IsPlaying then
+						for _, anim in pairs(loadedAnims) do
+							anim:Stop()
+						end
+						loadedAnims.Run:Play()
+					end
+				elseif not loadedAnims.Walk.IsPlaying then
+					for _, anim in pairs(loadedAnims) do
+						anim:Stop()
+					end
+					loadedAnims.Walk:Play()
+				end
+			elseif state == Enum.HumanoidStateType.Freefall or state == Enum.HumanoidStateType.Jumping then
+				for _, anim in pairs(loadedAnims) do
+					anim:Stop()
+				end
+			elseif not loadedAnims.Idle.IsPlaying and humanoid.MoveDirection.Magnitude == 0 then
+				for _, anim in pairs(loadedAnims) do
+					anim:Stop()
+				end
+				loadedAnims.Idle:Play()
+			end
+		else
+			for _, anim in pairs(loadedAnims) do
+				anim:Stop()
+			end
+		end
+	end)
+end
+
+if player.Character then
+	onCharacterAdded(player.Character)
+end
+player.CharacterAdded:Connect(onCharacterAdded)
