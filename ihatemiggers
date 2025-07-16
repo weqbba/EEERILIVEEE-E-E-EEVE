@@ -76,8 +76,6 @@ C.Enabled = true
 C.Rotation = 85
 C.Offset = Vector2.new(0,0)
 
-
-
 local Playsound = Instance.new("Sound",game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart"))
 Playsound.Name = "Danc"
 Playsound.Volume = 1
@@ -2345,4 +2343,46 @@ Anim:Destroy()
 end
 M()
 end)
+wait(5)
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local animator = humanoid:WaitForChild("Animator")
+
+local animations = {
+    Idle = 75752967925574,
+    Walk = 138716243839932,
+    Run = 88877750373872
+}
+
+local loadedAnims = {}
+
+for name, id in pairs(animations) do
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://"..id
+    loadedAnims[name] = animator:LoadAnimation(anim)
+end
+
+local currentAnim = nil
+
+local function playAnimation(name)
+    if currentAnim == loadedAnims[name] then return end
+    if currentAnim then
+        currentAnim:Stop()
+    end
+    currentAnim = loadedAnims[name]
+    currentAnim:Play()
+end
+
+humanoid.Running:Connect(function(speed)
+    if speed > 12 then
+        playAnimation("Run")
+    elseif speed > 0 then
+        playAnimation("Walk")
+    else
+        playAnimation("Idle")
+    end
+end)
+
+playAnimation("Idle")
 
